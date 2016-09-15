@@ -52,18 +52,18 @@ def handle_input(ser, msg, pos_mot_0, pos_mot_1):
 		#move down
 		pos_mot_1 += 0x19
 		motor_Zero = False
-	elif msg[0] == 'a'or msg[0] == 'A' or ord_msg == 67:
+	elif msg[0] == 'a'or msg[0] == 'A' or ord_msg == 68:
 		#move left
 		pos_mot_0 += 0x19
 		motor_Zero = True
-	elif msg[0] == 'd'or msg[0] == 'D' or ord_msg == 68:
+	elif msg[0] == 'd'or msg[0] == 'D' or ord_msg == 67:
 		#move right
 		pos_mot_0 -= 0x19
 		motor_Zero = True
 	else:
 		return_bool = False
-	pos_mot_0 = 0 if (pos_mot_0 <= 1) else (pos_mot_0 if (pos_mot_0 < 255) else 254)
-	pos_mot_1 = 0 if (pos_mot_1 <= 1) else (pos_mot_1 if (pos_mot_1 < 255) else 254)
+	pos_mot_0 = 0 if (pos_mot_0 <= 1) else (pos_mot_0 if (pos_mot_0 < 254) else 254)
+	pos_mot_1 = 0 if (pos_mot_1 <= 1) else (pos_mot_1 if (pos_mot_1 < 254) else 254)
 	return_bool = send_serial(ser, chr(0x00)+ chr(pos_mot_0) if motor_Zero else chr(0x01)+ chr(pos_mot_1))
 	return return_bool, pos_mot_0, pos_mot_1
 
