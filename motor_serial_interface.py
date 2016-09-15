@@ -4,12 +4,12 @@ import serial
 
 def send_serial(ser, msg):
 	#send serial output and return status bool
-	clear_byte = 0x00		# clear byte
+	clear_byte = 0x00		# clear byte, do not change
 	device_byte = 0x00		# device number
-	command_byte = 0x04		# MSB cleared command byte
-	data_byte_1 = 0x00		# command byte
-	data_byte_2 = 0x70		# command byte
-	data_byte_3 = 0x2E		# command byte
+	command_byte = 0x04		# MSB cleared command byte, do not change
+	data_byte_1 = 0x00		# channel number
+	data_byte_2 = 0x70		# target low bits
+	data_byte_3 = 0x2E		# target high bits
 
 	command_string = bytes(chr(clear_byte) + chr(device_byte) + chr(command_byte) + chr(data_byte_1) + chr(data_byte_2) + chr(data_byte_3))
 
@@ -31,11 +31,11 @@ def gather_input():
 
 def handle_input(ser, msg):
 	#ony check first char, bay life
-	if msg.count <= 0
+	if msg.count <= 0:
 		return False
 	if msg[0] == 'X' or  msg[0] == 'x':
 		return False
-	else
+	else:
 		return send_serial(ser, msg[0])
 	return False
 
