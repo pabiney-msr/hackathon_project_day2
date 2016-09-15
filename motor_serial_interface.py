@@ -39,23 +39,24 @@ def handle_input(ser, msg, pos_mot_0, pos_mot_1):
 
 	return_bool = False
 	motor_Zero = True
+	ord_msg = ord(msg)
 	if msg.count <= 0:
 		return False, pos_mot_0, pos_mot_1
 	if msg[0] == 'x' or  msg[0] == 'X':
 		return False, pos_mot_0, pos_mot_1
-	elif msg[0] == 'w'or msg[0] == 'W':
+	elif msg[0] == 'w'or msg[0] == 'W' or ord_msg == 65:
 		#move up
 		pos_mot_1 -= 0x19
 		motor_Zero = False
-	elif msg[0] == 's'or msg[0] == 'S':
+	elif msg[0] == 's'or msg[0] == 'S' or ord_msg == 66:
 		#move down
 		pos_mot_1 += 0x19
 		motor_Zero = False
-	elif msg[0] == 'a'or msg[0] == 'A':
+	elif msg[0] == 'a'or msg[0] == 'A' or ord_msg == 67:
 		#move left
 		pos_mot_0 += 0x19
 		motor_Zero = True
-	elif msg[0] == 'd'or msg[0] == 'D':
+	elif msg[0] == 'd'or msg[0] == 'D' or ord_msg == 68:
 		#move right
 		pos_mot_0 -= 0x19
 		motor_Zero = True
