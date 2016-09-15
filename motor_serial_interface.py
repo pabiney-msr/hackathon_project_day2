@@ -1,6 +1,21 @@
 import serial
 import sys
 
+try:
+    from msvcrt import getch
+except ImportError:
+    def getch():
+        import sys
+        import tty
+        import termios
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            return sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
 def send_serial(ser, msg):
 	#send serial output and return status bool
 	clear_byte = 0xFF		# clear byte, do not change
@@ -15,7 +30,8 @@ def read_serial(ser):
 
 def gather_input():
 	#return input
-	msg = raw_input()
+	#msg = raw_input()
+	msg = getch()
 	return msg
 
 def handle_input(ser, msg, pos_mot_0, pos_mot_1):
