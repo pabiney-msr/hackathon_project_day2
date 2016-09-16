@@ -76,8 +76,8 @@ class image_converter:
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
             if radius > 10:
-                cv2.circle(imgOriginal,(int(x),int(y)),int(radius),(0,255,0),2)
-                cv2.circle(imgOriginal,center,5,(0,0,255),-1)
+                cv2.circle(imgOriginal,(int(x), int(y)), int(radius), (0, 255, 0), 2)
+                cv2.circle(imgOriginal,center, 5, (0, 0, 255), -1)
                 pts.appendleft(center)
                 for i in np.arange(1,len(pts)):
                     thickness = int(np.sqrt(32/float(i+1))*2.5)
