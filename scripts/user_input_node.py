@@ -2,7 +2,7 @@
 
 # ROS imports:
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import Int16
 
 # Python imports:
 try:
@@ -27,7 +27,10 @@ def handle_input(msg, pos_mot_0, pos_mot_1):
     ord_msg = ord(msg)
 
     if msg.count <= 0:
-        return pos_mot_0, pos_mot_1
+        return False, pos_mot_0, pos_mot_1
+
+    if msg[0] == 'x' or  msg[0] == 'X':
+        return True, pos_mot_0, pos_mot_1
 
     if msg[0] == 'w' or msg[0] == 'W' or ord_msg == 65:
         pos_mot_1 -= 0x19 # move up
@@ -44,16 +47,22 @@ def handle_input(msg, pos_mot_0, pos_mot_1):
     else:
         print "User input did not produce valid motor command"
 
-    # clip motor positions and within boundaries if necessary
-    pos_mot_0 = 1 if (pos_mot_0 <= 1) else (pos_mot_0 if (pos_mot_0 < 254) else 254)
-    pos_mot_1 = 1 if (pos_mot_1 <= 1) else (pos_mot_1 if (pos_mot_1 < 254) else 254
+    # # clip motor positions and within boundaries if necessary
+    if pos_mot_0 < 1:
+        pos_mot_0 = 1
+    if pos_mot_0 > 254:
+        pos_mot_0 = 254
+    if pos_mot_1 < 1:
+        pos_mot_1 = 1
+    if pos_mot_1 > 254:
+        pos_mot_1 = 254
 
-    return pos_mot_0, pos_mot_1
+    return False, pos_mot_0, pos_mot_1
 
 
 def input_loop():
-    pub = rospy.Publisher('motor_commands', String, queue_size=10)
-    rospy.init_node('user_input_node', anonymous=True)
+    rospy.init_node('user_input_node', anonymous=False)
+    pub = rospy.Publisher('motor_commands', Int16, queue_size=10)
     rate = rospy.Rate(10) # 10hz
 
     pos_mot_0 = 0x7A
@@ -61,7 +70,8 @@ def input_loop():
     while not rospy.is_shutdown():
 
         msg = getch()
-        pos_mot_0, pos_mot_1 = handle_input(msg, pos_mot_0, pos_mot_1)
+        error, pos_mot_0, pos_mot_1 = handle_input(msg, pos_mot_0, pos_mot_1)
+        #handle_input(msg, pos_mot_0, pos_mot_1)
 
         rospy.loginfo(pos_mot_0)
         pub.publish(pos_mot_0)
@@ -69,6 +79,9 @@ def input_loop():
         pub.publish(pos_mot_1)
 
         rate.sleep()
+
+        if error:
+            break
 
 
 if __name__ == '__main__':

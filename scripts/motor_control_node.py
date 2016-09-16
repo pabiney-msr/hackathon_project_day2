@@ -26,7 +26,7 @@ def send_serial(ser, msg):
 
 
 def conrol_loop():
-    rospy.init_node('motor_control_node', anonymous=True)
+    rospy.init_node('motor_control_node', anonymous=False)
     rospy.Subscriber('motor_commands', String, callback)
     #set up serial
     ser = serial.Serial('/dev/ttyACM0')
