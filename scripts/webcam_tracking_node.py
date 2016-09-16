@@ -22,7 +22,11 @@ pts = deque(maxlen=32)
 
 class image_converter:
     def __init__(self):
+        self.pos_mot_0 = 0x7A
+        self.pos_mot_1 = 0x7A
+
         self.image_pub = rospy.Publisher("image_topic_2", Image, queue_size=10)
+        self.mot_pub = rospy.Publisher("motor_commands", Point, queue_size=10)
 
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/usb_cam/image_raw",Image,self.callback)
@@ -31,27 +35,42 @@ class image_converter:
         win = cv2.namedWindow("MyImage")
         name = "MyImage"
         cv2.createTrackbar('H_low',name,0,255,tb.nothing)
-        cv2.createTrackbar('S_low',name,113,255,tb.nothing)
-        cv2.createTrackbar('V_low',name,90,255,tb.nothing)
-        cv2.createTrackbar('H_high',name,9,255,tb.nothing)
-        cv2.createTrackbar('S_high',name,255,255,tb.nothing)
+        cv2.createTrackbar('S_low',name,164,255,tb.nothing)
+        cv2.createTrackbar('V_low',name,80,255,tb.nothing)
+        cv2.createTrackbar('H_high',name,180,255,tb.nothing)
+        cv2.createTrackbar('S_high',name,220,255,tb.nothing)
         cv2.createTrackbar('V_high',name,255,255,tb.nothing)
+
+    def moto_logic(center):
+        # use the center of the ball and camera to make direction and move that way
+        newCenter = np.array([center[0], center[1]])
+        screenCenter = np.array([640, 480])
+        distDir = newCenter - screenCenter
+        self.pos_mot_0 += ditDir.x
+        self.pos_mot_1 += ditDir.y
+
+        # clip motor positions and within boundaries if necessary
+        if self.pos_mot_0 < 1:
+            self.pos_mot_0 = 1
+        elif self.pos_mot_0 > 254:
+            self.pos_mot_0 = 254
+        if self.pos_mot_1 < 1:
+            self.pos_mot_1 = 1
+        elif self.pos_mot_1 > 254:
+            self.pos_mot_1 = 254
+        #put values in msg type and publish
+        out = Point()
+        out.x = self.pos_mot_0
+        out.y = self.pos_mot_1
+        out.z = 0
+        rospy.loginfo(out)
+        self.mot_pub.publish(out)
 
     def callback(self,data):
         try:
             imgOriginal = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print("==[CAMERA MANAGER]==", e)
-        # (rows,cols,channels) = imgOriginal.shape
-        # if cols > 60 and rows > 60:
-        #     cv2.circle(imgOriginal,(50,50),10,255)
-
-        # imgGrayscale = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2GRAY)
-        # circles = cv2.HoughCircles(imgGrayscale,cv2.cv.CV_HOUGH_GRADIENT,1.2,100)
-        # if circles is not None:
-        #     circles = np.round(circles[0, :]).astype("int")
-        #     for (x,y,r) in circles:
-        #         cv2.circle(imgGrayscale, (x, y), r, (0, 255, 0), 4)
 
         blurred = cv2.GaussianBlur(imgOriginal,(11,11),0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
@@ -60,8 +79,6 @@ class image_converter:
 
         lower = np.array([h_low,s_low,v_low])
         upper = np.array([h_hi,s_hi,v_hi])
-        # lower = np.array([0,100,100])
-        # upper = np.array([50,255,255])
     	mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.erode(mask, None, iterations=7)
         mask = cv2.dilate(mask, None, iterations=7)
@@ -76,6 +93,10 @@ class image_converter:
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
             if radius > 10:
+                #send message
+                moto_logic(center)
+
+                #draw
                 cv2.circle(imgOriginal,(int(x), int(y)), int(radius), (0, 255, 0), 2)
                 cv2.circle(imgOriginal,center, 5, (0, 0, 255), -1)
                 pts.appendleft(center)
