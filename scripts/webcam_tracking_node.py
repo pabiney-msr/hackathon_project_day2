@@ -46,8 +46,8 @@ class image_converter:
         newCenter = np.array([center[0], center[1]])
         screenCenter = np.array([640, 480])
         distDir = newCenter - screenCenter
-        self.pos_mot_0 += ditDir.x
-        self.pos_mot_1 += ditDir.y
+        self.pos_mot_0 += distDir.x
+        self.pos_mot_1 += distDir.y
 
         # clip motor positions and within boundaries if necessary
         if self.pos_mot_0 < 1:
@@ -94,7 +94,7 @@ class image_converter:
 
             if radius > 10:
                 #send message
-                moto_logic(center)
+                self.moto_logic(center)
 
                 #draw
                 cv2.circle(imgOriginal,(int(x), int(y)), int(radius), (0, 255, 0), 2)
