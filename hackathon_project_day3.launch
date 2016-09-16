@@ -4,7 +4,8 @@
 		<param name="_pixel_format" value="yuyv" />
 		<param name="_camera_name" value="tracker_camera" />
 	</node>
-	<node name="motor_control_node" pkg="hackathon_project_day3" type="subscriber" />
-	<node name="webcam_tracking_node" pkg="hackathon_project_day3" type="publisher" />
-	<node name="user_input_node" pkg="hackathon_project_day3" type="publisher" />
+	<node name="motor_control_node" pkg="hackathon_project_day3" type="motor_control_node.py" />
+    <node name="user_input_node" pkg="hackathon_project_day3" type="user_input_node.py" />
+	<node name="webcam_tracking_node" pkg="hackathon_project_day3" type="webcam_tracking_node.py" />
+
 </launch>
