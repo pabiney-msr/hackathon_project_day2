@@ -49,14 +49,14 @@ class image_converter:
         distDir = newCenter - screenCenter
         #distDir = distDir/np.linalg.norm(distDir)
         #if distDir[0] < 1:
-        if abs(distDir[0]) > 0:
-            self.pos_mot_0 += 0.1 * distDir[0]/abs(distDir[0])
+        if abs(distDir[0]) > 0.01:
+            self.pos_mot_0 += 0.01 * distDir[0] #/abs(distDir[0])
         # else:
         #     self.pos_mot_0 += distDir[0]
 
         #if distDir[1] < 1:
-        if abs(distDir[1]) > 0:
-            self.pos_mot_1 += 0.1 * distDir[1]/abs(distDir[1])
+        if abs(distDir[1]) > 0.01:
+            self.pos_mot_1 += 0.01 * distDir[1] #/abs(distDir[1])
         # else:
         #     self.pos_mot_1 += distDir[1]
 
@@ -90,7 +90,7 @@ class image_converter:
 
         lower = np.array([h_low,s_low,v_low])
         upper = np.array([h_hi,s_hi,v_hi])
-    	mask = cv2.inRange(hsv, lower, upper)
+        mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.erode(mask, None, iterations=7)
         mask = cv2.dilate(mask, None, iterations=7)
         output = cv2.bitwise_and(imgOriginal, imgOriginal, mask = mask)
@@ -105,12 +105,22 @@ class image_converter:
 
             if radius > 10:
                 #send message
-                self.moto_logic(center)
+                sumelements = [0, 0]
+                pts.appendleft(center)
+                deliminator = 5
+                if len(pts) < deliminator:
+                    deliminator = len(pts)
+                for i in np.arange(0, deliminator):
+                    sumelements[0] += pts[i][0]
+                    sumelements[1] += pts[i][1]
+                sumelements[0] = sumelements[0] / deliminator
+                sumelements[1] = sumelements[1] / deliminator
+                self.moto_logic(sumelements)
 
                 #draw
                 cv2.circle(imgOriginal,(int(x), int(y)), int(radius), (0, 255, 0), 2)
                 cv2.circle(imgOriginal,center, 5, (0, 0, 255), -1)
-                pts.appendleft(center)
+
                 for i in np.arange(1,len(pts)):
                     thickness = int(np.sqrt(32/float(i+1))*2.5)
                     cv2.line(imgOriginal,pts[i-1],pts[i],(0,0,255),thickness)
