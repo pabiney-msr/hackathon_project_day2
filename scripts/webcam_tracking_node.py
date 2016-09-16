@@ -27,6 +27,7 @@ class image_converter:
 
         self.image_pub = rospy.Publisher("image_topic_2", Image, queue_size=10)
         self.mot_pub = rospy.Publisher("motor_commands", Point, queue_size=10)
+        #rate = rospy.Rate(3) # 10hz
 
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/usb_cam/image_raw",Image,self.callback)
@@ -41,13 +42,23 @@ class image_converter:
         cv2.createTrackbar('S_high',name,220,255,tb.nothing)
         cv2.createTrackbar('V_high',name,255,255,tb.nothing)
 
-    def moto_logic(center):
+    def moto_logic(self, center):
         # use the center of the ball and camera to make direction and move that way
         newCenter = np.array([center[0], center[1]])
-        screenCenter = np.array([640, 480])
+        screenCenter = np.array([640*0.5, 480*0.5])
         distDir = newCenter - screenCenter
-        self.pos_mot_0 += distDir.x
-        self.pos_mot_1 += distDir.y
+        #distDir = distDir/np.linalg.norm(distDir)
+        #if distDir[0] < 1:
+        if abs(distDir[0]) > 0:
+            self.pos_mot_0 += 0.1 * distDir[0]/abs(distDir[0])
+        # else:
+        #     self.pos_mot_0 += distDir[0]
+
+        #if distDir[1] < 1:
+        if abs(distDir[1]) > 0:
+            self.pos_mot_1 += 0.1 * distDir[1]/abs(distDir[1])
+        # else:
+        #     self.pos_mot_1 += distDir[1]
 
         # clip motor positions and within boundaries if necessary
         if self.pos_mot_0 < 1:
