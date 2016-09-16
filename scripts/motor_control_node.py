@@ -2,7 +2,8 @@
 
 # ROS imports:
 import rospy
-from std_msgs.msg import String
+#from std_msgs.msg import Int16
+from geometry_msgs.msg import Point
 
 # Python imports:
 import serial
@@ -10,8 +11,12 @@ import sys
 
 
 
-def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+def callback(pt_msg, ser):
+    rospy.loginfo(pt_msg)
+    pos_mot_0 = int(pt_msg.x)
+    pos_mot_1 = int(pt_msg.y)
+    send_serial(ser, chr(0x00) + chr(pos_mot_0))
+    send_serial(ser, chr(0x01) + chr(pos_mot_1))
 
 
 def send_serial(ser, msg):
@@ -26,27 +31,17 @@ def send_serial(ser, msg):
 
 
 def conrol_loop():
-    rospy.init_node('motor_control_node', anonymous=False)
-    rospy.Subscriber('motor_commands', String, callback)
     #set up serial
     ser = serial.Serial('/dev/ttyACM0')
     if not ser.isOpen():
         print "some horrible warning"
         sys.exit(42)
-    # NEED TO IMPORT FROM TOPIC pos_mot_0
-    # NEED TO IMPORT FROM TOPIC pos_mot_1
-    send_serial(ser, chr(0x00) + chr(pos_mot_0))
-    send_serial(ser, chr(0x01) + chr(pos_mot_1))
+
+    rospy.init_node('motor_control_node', anonymous=False)
+    rospy.Subscriber('motor_commands', Point, callback, ser)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
-
-
-
-# TODO:
-# need to import pos_mot_0 and pos_mot_1 from ROS topic
-#
-
 
 
 if __name__ == '__main__':

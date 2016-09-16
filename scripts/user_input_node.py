@@ -2,7 +2,8 @@
 
 # ROS imports:
 import rospy
-from std_msgs.msg import Int16
+#from std_msgs.msg import Int16
+from geometry_msgs.msg import Point
 
 # Python imports:
 try:
@@ -19,6 +20,7 @@ except ImportError:
             return sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
 
 
 def handle_input(msg, pos_mot_0, pos_mot_1):
@@ -62,7 +64,7 @@ def handle_input(msg, pos_mot_0, pos_mot_1):
 
 def input_loop():
     rospy.init_node('user_input_node', anonymous=False)
-    pub = rospy.Publisher('motor_commands', Int16, queue_size=10)
+    pub = rospy.Publisher('motor_commands', Point, queue_size=10)
     rate = rospy.Rate(10) # 10hz
 
     pos_mot_0 = 0x7A
@@ -72,11 +74,13 @@ def input_loop():
         msg = getch()
         error, pos_mot_0, pos_mot_1 = handle_input(msg, pos_mot_0, pos_mot_1)
         #handle_input(msg, pos_mot_0, pos_mot_1)
+        out = Point()
+        out.x = pos_mot_0
+        out.y = pos_mot_1
+        out.z = 0
 
-        rospy.loginfo(pos_mot_0)
-        pub.publish(pos_mot_0)
-        rospy.loginfo(pos_mot_1)
-        pub.publish(pos_mot_1)
+        rospy.loginfo(out)
+        pub.publish(out)
 
         rate.sleep()
 

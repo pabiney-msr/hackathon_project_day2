@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 # import roslib
 # roslib.load_manifest('~/ros-workspaces/hackathon_ws/src/hackathon_project/package.xml')
+
+# ROS imports:
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from geometry_msgs.msg import Point
+
+# Python imports:
 import sys
 import rospy
 import cv2
 import numpy as np
 import trackbar as tb
-from std_msgs.msg import String
-from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from collections import deque
+
+
 
 pts = deque(maxlen=32)
 
